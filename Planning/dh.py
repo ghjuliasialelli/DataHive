@@ -8,6 +8,7 @@ Created on Fri Feb 15 19:30:57 2019
 #import dist
 from Trees import Tree
 from info import *
+import math
 
 
 TEMPS_PAR_CHAMBRE = 5
@@ -73,49 +74,49 @@ def compute_all_itinaries(hotels,M,team_size):
     itis.sort(key = lambda x : -x[2])
     return itis
 
-def plan_week(inputt,teams,M):
+def plan_week(inputt,teams,M,blacklist_id):
+    visited_h = set()
+    for i,hotel in enumerate(inputt):
+        if hotel[H.ID] in blacklist_id:
+            visited_h.add(i)
+    print(visited_h)
     team_itis = [[] for _ in teams]
     itis_per_team_size = {}
     for team in range(len(teams)):
         itis_per_team_size[team] = compute_all_itinaries(inputt,M,teams[team])
         itis_per_team_size[team].sort(key = lambda x : -x[2])
-    visited_h = set()
     for _ in range(DAYS):
         for i in range(len(teams)):
+            for t in itis_per_team_size:
+                t_rm = []
+                for j,iti in enumerate(itis_per_team_size[t]):
+                    for h in visited_h:
+                        if h in iti[0]:
+                            t_rm.append(j)
+                            break
+                for j in reversed(t_rm):
+                    itis_per_team_size[t].pop(j)
             if len(itis_per_team_size[i]) == 0:
                 continue
             print('For team {} with {} people :'.format(i,teams[i]))
             for iti in itis_per_team_size[i][:3]:
                 for h in iti[0]:
                     print(inputt[h][H.name])
-                print('It will take {} hours'.format(iti[1]/60))
+                print('We approximate it to {} hours'.format(round(iti[1]/60,2)))
+                x = distances(iti[0],voiture[i])
+                print('With {} minutes in transport'.format(x[0]) + (' or with {} minutes in car'.format(x[1]) if voiture[i] else ''))
                 print()
             x = int(input('Choose one: '))-1
             team_itis[i].append(itis_per_team_size[i][x])
             visited_h.update(set(itis_per_team_size[i][x][0]))
-            for t in itis_per_team_size:
-                t_rm = []
-                for i,iti in enumerate(itis_per_team_size[t]):
-                    for h in visited_h:
-                        if h in iti[0]:
-                            t_rm.append(i)
-                            break
-                for i in reversed(t_rm):
-                    itis_per_team_size[t].pop(i)
     for team in team_itis:
         print('Planning for team')
         print()
         for iti in team:
             for h in iti[0]:
                 print(inputt[h][H.name])
-            print('It will take {} hours'.format(iti[1]/60))
+            print('It will take {} hours'.format(round(iti[1]/60,2)))
             print() 
+    print(team_itis)
 
-plan_week(inputt,teams,M)
-
-                   
-            
-        
-    
-    
-    
+plan_week(inputt,teams,M,set([184])) #last element is the blacklist it contains the ids of the hotels

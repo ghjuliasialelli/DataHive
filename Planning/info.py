@@ -19,6 +19,8 @@ inputt =    [[225,"Grand Hôtel d'Aboukir", "134 rue d'Aboukir","75002", 35, 7],
             [22831574, "Hôtel Parmentier","23 rue saint-ambroise","75011", 88,4],
             [184, "des Fontaines","2 rue des Fontaines du Temple","75003", 41, 8]]
 
+team_members = [['person A','person B'],['person C','person D','person E']]
+
 teams = [2,3]
 voiture = [True,False]
 
