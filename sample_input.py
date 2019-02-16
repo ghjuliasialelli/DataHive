@@ -1,7 +1,24 @@
-inputt =    [[225,"Grand Hôtel d'Aboukir", "134 rue d'Aboukir","75002", 35, 7], 
-            [7180332, "Chaussée d'Antin", "46 rue de la Chaussée d'Antin", "75009", 34, 3]
-            [3029096, "Métropolitain", "158 rue Oberkampf", "75011", 60, 5]
-            [69, "Cristal","64 rue de la Jonquière","75017", 98, 10]
-            [160, "des Beaux-Arts","4 rue André Antoine","75018", 76, 2]
-            [14664544, "Moderne - Paris 20ème","57 rue de la Réunion","75020", 41,10]] 
+from file1 import * 
 
+inputt =    [[225,"Grand Hôtel d'Aboukir", "134 rue d'Aboukir","75002", 35, 7], 
+            [7180332, "Chaussée d'Antin", "46 rue de la Chaussée d'Antin", "75009", 34, 3],
+            [3029096, "Métropolitain", "158 rue Oberkampf", "75011", 60, 5],
+            [69, "Cristal","64 rue de la Jonquière","75017", 98, 10],
+            [160, "des Beaux-Arts","4 rue André Antoine","75018", 76, 2],
+            [14664544, "Moderne - Paris 20ème","57 rue de la Réunion","75020", 41,10],
+            [7923060, "Sofiane","66 boulevard de Charonne","75020",47,2],
+            [7877630, "Hipotel Paris Buttes Chaumont","7 rue Jean Baptiste Dumay","75020", 73,5],
+            [130, "de Normandie", "4 rue d'Amsterdam","75009", 200,3],
+            [5928342, "Maison Blanche","107 Bis Avenue d'Italie","75013", 49, 9],
+            [75, "des Pyrénées - 20","399 bis rue des Pyrénées","75020", 79,6],
+            [22831574, "Hôtel Parmentier","23 rue saint-ambroise","75011", 88,4],
+            [184, "des Fontaines","2 rue des Fontaines du Temple","75003", 41, 8]]
+
+
+#locations = ["134 rue d'Aboukir 75002", "46 rue de la Chaussée d'Antin 75009"] #, '158 rue Oberkampf 75011', '64 rue de la Jonquière 75017', '4 rue André Antoine 75018', '57 rue de la Réunion 75020']
+
+locations = ["134 rue d'Aboukir75002", "46 rue de la Chaussée d'Antin75009", '158 rue Oberkampf75011', '64 rue de la Jonquière75017', '4 rue André Antoine75018', '57 rue de la Réunion75020']
+
+res = distance_matrix(True, locations)
+
+print(res)
