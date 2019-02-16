@@ -4,6 +4,8 @@ import xml.etree.ElementTree as PARSER
 import urllib.parse
 # For HTTP requests
 import requests
+# For Haversinee formula
+from math import cos, asin, sqrt
 
 API_KEY_GEO = "AIzaSyBcjo9aomsuIHltAcczyrOJJXZIkrGy0vk"
 
@@ -41,9 +43,9 @@ def parse_XML_geo(data):
             for location in geometry.getiterator("location"):
                 for coordinates in list(location):
                     if coordinates.tag == "lat": 
-                        lat = coordinates.text 
+                        lat = float(coordinates.text)
                     if coordinates.tag == "lng":
-                        lng = coordinates.text 
+                        lng = float(coordinates.text)
                         res.append((lat,lng))
         i += 1
     return res 
@@ -71,6 +73,24 @@ def get_geolocation(locations):
     return res
 
 
-def geoloc(inputt):
+def distance_vol(lat1, lon1, lat2, lon2):
+    p = 0.017453292519943295     #Pi/180
+    a = 0.5 - cos((lat2 - lat1) * p)/2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2
+    return 12742 * asin(sqrt(a)) #2*R*asin...
+
+def matrice_vol(inputt):
     locations = input_to_loc(inputt)
-    return get_geolocation(locations)
+    geolocations = get_geolocation(locations)
+    n = len(geolocations)
+    matrix = [[0 for _ in range(n)] for _ in range(n)]
+    for i in range(n):
+        lat1, lon1 = geolocations[i]
+        for j in range(i):
+            lat2, lon2 = geolocations[j]
+            dist = distance_vol(lat1, lon1, lat2, lon2)
+            matrix[i][j] = dist
+            matrix[j][i] = dist
+    return matrix
+
+res = matrice_vol(inputt)
+print(res)
