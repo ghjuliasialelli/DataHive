@@ -4,9 +4,6 @@ import xml.etree.ElementTree as PARSER
 import urllib.parse
 # For HTTP requests
 import requests
-
-API_KEY = "AIzaSyDSlnWcTV2bIenN_JTnn6BzLNeBI0tHOtA"
-
     
 def matrix_driving(base_url, origins, locations):
     url = base_url+"origins="+origins+"&destinations="+origins+"&key="+API_KEY
