@@ -66,10 +66,8 @@ def get_geolocation(locations):
     p = n//5 
     r = n%5
     res = []
-    for i in range(p):
-        res += parse_XML_geo(request_geolocation(locations[5*i:5*(i+1)]))
-    if r != 0 : 
-        res += parse_XML_geo(request_geolocation(locations[5*p:]))
+    for i in range(n):
+        res += parse_XML_geo(request_geolocation(locations[i:i+1]))
     return res
 
 
@@ -91,6 +89,3 @@ def matrice_vol(inputt):
             matrix[i][j] = dist
             matrix[j][i] = dist
     return matrix
-
-res = matrice_vol(inputt)
-print(res)
