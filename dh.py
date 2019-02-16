@@ -5,21 +5,25 @@ Created on Fri Feb 15 19:30:57 2019
 @author: Sebastien
 """
 
+import distance_m
+
+
 TEMPS_PAR_CHAMBRE = 10
 CHAMBRES_PAR_JOUR_PAR_PERSONNE = 30
 HEURES_PAR_JOUR = 7.5
 MAX_MINUTES = int(HEURES_PAR_JOUR * 60)
 NOMBRE_DE_PERSONNE = 3
 
-data = [['id1','hotel1','somewhere',30,5],['id1','hotel1','somewhere',3,2],
-        ['id1','hotel1','somewhere',10,10],['id1','hotel1','somewhere',100,7],
-        ['id1','hotel1','somewhere',15,1],['id1','hotel1','somewhere',70,10]]
-M = [[59, 30, 20, 25, 26, 50],
-     [34, 43, 53, 58, 37, 38],
-     [34, 57, 57, 22, 34, 17],
-     [29, 47, 22, 17, 40, 53],
-     [12, 47, 56, 25, 18, 25],
-     [48, 52, 45, 39, 36, 30]]
+
+inputt =    [[225,"Grand Hôtel d'Aboukir", "134 rue d'Aboukir","75002", 35, 7], 
+            [7180332, "Chaussée d'Antin", "46 rue de la Chaussée d'Antin", "75009", 34, 3],
+            [3029096, "Métropolitain", "158 rue Oberkampf", "75011", 60, 5],
+            [69, "Cristal","64 rue de la Jonquière","75017", 98, 10],
+            [160, "des Beaux-Arts","4 rue André Antoine","75018", 76, 2],
+            [14664544, "Moderne - Paris 20ème","57 rue de la Réunion","75020", 41,10]] 
+
+
+M = distance_m.distance_matrix_g(False,inputt)[0]
 
 def score_function(hotel):
     return hotel[Hotel.number_of_rooms]*hotel[Hotel.grade]
@@ -28,8 +32,9 @@ class Hotel: #C++ style
     ID = 0
     name = 1
     address = 2
-    number_of_rooms = 3
-    grade = 4
+    code_postal = 3
+    number_of_rooms = 4
+    grade = 5
     
 class Tree:
     def __init__(self,key,data):
@@ -40,6 +45,7 @@ class Tree:
 
     def get_itis(self):
         return self.root.get_itis([])
+    
 class Node:
     def __init__(self,key,data,parents):
         self.key = key
@@ -113,8 +119,8 @@ def score_itis(hotels,itis):
             scored_itis.append(list(iti) + [score/iti[1]])
     return scored_itis
     
-
-compute_all_itinaries(data,M)
+print(inputt,M)
+compute_all_itinaries(inputt,M)
                    
             
         
