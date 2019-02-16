@@ -5,8 +5,6 @@ import urllib.parse
 # For HTTP requests
 import requests
 
-API_KEY = "AIzaSyDSlnWcTV2bIenN_JTnn6BzLNeBI0tHOtA"
-
 # input : [(hotelname, ....) ,..]
 # extract hotel names
 #input = [...]
