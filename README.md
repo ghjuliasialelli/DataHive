@@ -1,1 +1,2 @@
-# DataHive
+# DataHive Hackaton
+# SEB AND GHJU <3 SCHRODINGER CATS
