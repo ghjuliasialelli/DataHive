@@ -5,33 +5,12 @@ import urllib.parse
 # For HTTP requests
 import requests
 
-# input : [(hotelname, ....) ,..]
-# extract hotel names
-#input = [...]
-locations = ["Rue Jacques Brel Espace de L'Archer 02200", "RUE DU MOULIN LE BLANC 08000", "ZAC L'écluse des Marots - Parc Sud Saint Thibaud	10800"]
-        #locations = [input[i][Hotel.address] for i in range(len(input))]
+API_KEY = "AIzaSyDSlnWcTV2bIenN_JTnn6BzLNeBI0tHOtA"
 
-
-# Lauch the Google maps API
-base_url= "https://maps.googleapis.com/maps/api/distancematrix/xml" # pas de '?' a la fin en utilisant requests 
-
-origins = urllib.parse.quote_plus(locations[0])
-for i in range(1, len(locations)):
-    origins = origins+"|"+urllib.parse.quote_plus(locations[i])
-
-
-def distance_matrix(voiture_dispo):
-    matrix_transit = matrix_transit()
-    res = [matrix_transit]
-    if voiture_dispo : 
-        matrix_driving = matrix_driving()
-        res.append(matrix_driving)
-    return res 
     
-    
-def matrix_driving():
-    params_driving = {'origins':origins, 'destinations':origins, 'key':API_KEY}
-    r_driving = requests.get(base_url, params=params_driving)
+def matrix_driving(base_url, origins, locations):
+    url = base_url+"origins="+origins+"&destinations="+origins+"&key="+API_KEY
+    r_driving = requests.get(url)
     data_driving = r_driving.text
 
     # Parse input XML for driving 
@@ -45,14 +24,14 @@ def matrix_driving():
             for duration in column.getiterator("duration"):
                 for value in list(duration):
                     if value.tag == "value": 
-                        print("i,j", (i,j))
-                        driving_matrix[i][j] = int(value.text)/60
+                        driving_matrix[i][j] = int(int(value.text)/60)+1
             j+=1
         i+=1
+    return driving_matrix
 
-def matrix_transit():
-    params_transit = {'origins':origins, 'destinations':origins, 'mode':'transit', 'key':API_KEY}
-    r_transit = requests.get(base_url, params=params_transit)
+def matrix_transit(base_url, origins, locations):
+    url = base_url+"origins="+origins+"&destinations="+origins+"&mode=transit&key="+API_KEY
+    r_transit = requests.get(url)
     data_transit = r_transit.text
 
     # Parse input XML for transit 
@@ -66,7 +45,23 @@ def matrix_transit():
             for duration in column.getiterator("duration"):
                 for value in list(duration):
                     if value.tag == "value": 
-                        transit_matrix[i][j] = int(value.text)/60
+                        transit_matrix[i][j] = int(int(value.text)/60)+1
             j+=1
         i+=1
 
+    return transit_matrix
+
+def distance_matrix(voiture_dispo, locations):
+    base_url= "https://maps.googleapis.com/maps/api/distancematrix/xml?"  
+
+    origins = urllib.parse.quote_plus(locations[0])
+    for i in range(1, len(locations)):
+        origins = origins+"|"+urllib.parse.quote_plus(locations[i])
+
+    matrix_t = matrix_transit(base_url, origins, locations)
+    res = [matrix_t]
+    if voiture_dispo : 
+        matrix_d = matrix_driving(base_url, origins, locations)
+        res.append(matrix_d)
+    return res 
+    
