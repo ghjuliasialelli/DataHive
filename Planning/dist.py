@@ -7,8 +7,6 @@ import requests
 # For Haversinee formula
 from math import cos, asin, sqrt
 
-API_KEY = "AIzaSyDSlnWcTV2bIenN_JTnn6BzLNeBI0tHOtA"
-API_KEY_GEO = "AIzaSyBcjo9aomsuIHltAcczyrOJJXZIkrGy0vk"
 
 distance_dic = [{},{}]
 # distance_dic[0] : distances by transit
