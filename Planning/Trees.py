@@ -25,6 +25,7 @@ class Node:
     def insert(self,key,data):
         parents = self.parents.union([key])
         self.children[key] = Node(key,data,parents)
+        return self.children[key]
         
     def get_leafs(self):
         if len(self.children) == 0:

@@ -7,11 +7,18 @@ import requests
 # For Haversinee formula
 from math import cos, asin, sqrt
 
+import info 
 
+API_KEY = "AIzaSyDSlnWcTV2bIenN_JTnn6BzLNeBI0tHOtA"
+API_KEY_GEO = "AIzaSyBcjo9aomsuIHltAcczyrOJJXZIkrGy0vk"
+
+# Liste de dictionaires avec les distances entre les hotels 
 distance_dic = [{},{}]
-# distance_dic[0] : distances by transit
-# distance_dic[1] : distances by car
+# distance_dic[0] : distances en transports en commun
+# distance_dic[1] : distances en voiture
+# On procede ainsi parce qu'on est toujours sur de devoir compute les distances en transports
 
+"""
 inputt =    [[225,"Grand Hôtel d'Aboukir", "134 rue d'Aboukir","75002", 35, 7], 
             [7180332, "Chaussée d'Antin", "46 rue de la Chaussée d'Antin", "75009", 34, 3],
             [3029096, "Métropolitain", "158 rue Oberkampf", "75011", 60, 5],
@@ -25,18 +32,27 @@ inputt =    [[225,"Grand Hôtel d'Aboukir", "134 rue d'Aboukir","75002", 35, 7],
             [75, "des Pyrénées - 20","399 bis rue des Pyrénées","75020", 79,6],
             [22831574, "Hôtel Parmentier","23 rue saint-ambroise","75011", 88,4],
             [184, "des Fontaines","2 rue des Fontaines du Temple","75003", 41, 8]]
+"""
 
-class Hotel: #C++ style
+class H: 
     ID = 0
     name = 1
     address = 2
-    code_postal = 3
-    number_of_rooms = 4
+    CP = 3
+    n_rooms = 4
     grade = 5
 
 def input_to_loc(hotels):
-    return [hotels[i][Hotel.address] + " " + hotels[i][Hotel.code_postal] for i in range(len(hotels))]
+    return [hotels[i][H.address] + " " + hotels[i][H.CP] for i in range(len(hotels))]
 
+
+################################################
+# Utilisation de l'API Geolocation de Google   #
+# Calcul des coordonnées des adresses          #
+# Et des distances à vol d'oiseau              #
+################################################
+
+# Rend une liste des coordonnées (lat, lng) à partir d'un XML 
 def parse_XML_geo(data):
     res = []
     root = PARSER.fromstring(data)
@@ -53,7 +69,7 @@ def parse_XML_geo(data):
         i += 1
     return res 
 
-
+# Lance une requete à l'API de Google pour obtenir les coordonnées 
 def request_geolocation(loc):
     base_url = "https://maps.googleapis.com/maps/api/geocode/xml?"
     addresses = urllib.parse.quote_plus(loc[0])
@@ -63,23 +79,37 @@ def request_geolocation(loc):
     xmltxt = requests.get(url).text
     return xmltxt
 
-
+# Wrapper function : 
 def get_geolocation(locations):
+    print('get geolocation function :', len(locations))
     n = len(locations)
     res = []
+    print("FUCKING n ",n)
     for i in range(n):
-        res += parse_XML_geo(request_geolocation(locations[i:i+1]))
+        print('     in geo :', (i/n)*100)
+        print("    len res avant insertion :", len(res))
+        print("     locations[] :", locations[i:i+1])
+        t = parse_XML_geo(request_geolocation(locations[i:i+1]))
+        print(len(t))
+        res.append(t[0])
+        print("    len res apres insertion :", len(res))
+    print("         len of the output :", len(res))
     return res
 
-
+# Calcule la distance à vol d'oiseau entre deux points 
 def distance_vol(lat1, lon1, lat2, lon2):
     p = 0.017453292519943295     #Pi/180
     a = 0.5 - cos((lat2 - lat1) * p)/2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2
     return 12742 * asin(sqrt(a)) #2*R*asin...
 
+# Calcule la matrice des distances à vol d'oiseau entre les adresses données dans inputt
 def matrice_vol(inputt):
+    print("matrice_vol function")
+    print("     len of input :", len(inputt))
     locations = input_to_loc(inputt)
+    print("      len of locations (conversion)", len(locations))
     geolocations = get_geolocation(locations)
+    print("       len of geolocations :", len(geolocations))
     n = len(geolocations)
     matrix = [[0 for _ in range(n)] for _ in range(n)]
     for i in range(n):
@@ -91,6 +121,14 @@ def matrice_vol(inputt):
             matrix[j][i] = dist
     return matrix
 
+
+
+################################################
+# Utilisation de l'API Route de Google         #
+# Calcul des temps en voiture ou en tranport   #
+################################################
+
+# Lit le XML et rend la matrice des distances 
 def parse_XML_route(data, loc):
     root = PARSER.fromstring(data)
     matrix = [[0 for _ in range(len(loc))] for _ in range(len(loc))]
@@ -106,6 +144,7 @@ def parse_XML_route(data, loc):
         i+=1
     return matrix
 
+# Lance une requete à Google pour obtenir les temps en voiture entre les points dans ori et les points dans dest
 def request_route_voiture(ori, dest):
     base_url= "https://maps.googleapis.com/maps/api/distancematrix/xml?"  
     origins = urllib.parse.quote_plus(ori[0])
@@ -118,6 +157,7 @@ def request_route_voiture(ori, dest):
     xmltxt = requests.get(url).text
     return xmltxt
 
+# Lance une requete à Google pour obtenir les temps en transports entre les points dans ori et les points dans dest
 def request_route_transit(ori, dest):
     base_url= "https://maps.googleapis.com/maps/api/distancematrix/xml?"  
     origins = urllib.parse.quote_plus(ori[0])
@@ -130,7 +170,7 @@ def request_route_transit(ori, dest):
     xmltxt = requests.get(url).text
     return xmltxt
 
-
+# Temps en transports en commun entre les points de l'itinéraire
 def distance_transit(itin):
     res = {}
     travel = [(itin[i],itin[i+1]) for i in range(len(itin)-1)]
@@ -151,7 +191,7 @@ def distance_transit(itin):
         res[couple] = matrix_transit[i][i]
     return res 
 
-        
+# Temps en voiture entre les points de l'itinéraire 
 def distance_voiture(itin):
     res = {}
     travel = [(itin[i],itin[i+1]) for i in range(len(itin)-1)]
@@ -172,7 +212,8 @@ def distance_voiture(itin):
         res[couple] = matrix_transit[i][i]
     return res 
 
-
+# Wrapper function : rend la durée totale d'un itinéraire 
+# En transports et/ou en voiture, en fonction de la valeur du booléen voiture_dispo
 def distances(itin, voiture_dispo): 
     # input : 
     # itin : itinerary = list of hotels 
@@ -183,4 +224,51 @@ def distances(itin, voiture_dispo):
     a = [sum([res[0][i] for i in res[0]])] + ([sum([res[1][i] for i in res[1]])] if voiture_dispo else [])
     return a
 
-print(distances([1,2,3],True))
+
+
+############################################
+# Calcul distance maison employé / hotel   #
+############################################
+
+# Output : liste des distances entre chaque employé et les points de départ
+# Format : [[*liste de distances entre chaque employé et point1*], 
+#           [*liste de distances entre chaque employé et point2*],
+#               ...                                               ]  
+def distance_from_team(team_index, points):
+    # team_index : index de l'équipe dont on veut calculer les distances
+    # points : liste de points de départ potentiels pour l'itinéraire
+    team = teams[team_index]
+    addresses = [construct_address(employe) for employe in team]
+    geo = get_geolocation(addresses)   # localisation de chaque membre de l'équipe
+    distances = []
+    for person in geo:
+        dist = []
+        for point in point: 
+            lat1, lon1 = person[0], person[1]
+            lat2, lon2 = point[0], point[1]
+            dist.append(distdistance_vol(lat1, lon1, lat2, lon2))
+        distances.append(dist)
+    return distances
+
+# Classe de salariés, facilite l'accès à la base de données
+# Ne considère pas les disponibilités. 
+# Le manager devra rentrer manuellement qui fait partie de quelle équipe 
+# pour les 4 jours de la semaine. 
+class S: 
+    nom = 0
+    prénom = 1
+    num_voie = 2
+    non_identifie = 3   # pas compris ce que la colonne D du fichier excel représente
+    nom_voie = 4
+    localite = 5
+    CP = 6
+    permis = 7
+    secteur = 8         # liste des secteurs couverts
+
+def construct_address(person):
+    # Idéalement, 'person' serait un id_employe. Facilite l'accès à la base de donnée
+    # Implémentation effectuée avec cette assumption
+    # Prend l'id d'un employé et rend une adresse utilisable par l'API de Google maps sous forme de string
+    # Format de l'adresse : Num voie + Nom voie + Localité + Code postal
+    return data_salarie[person].num_voie + " " +  data_salarie[person].nom_voie + " " +  data_salarie[person].localite + " " +  data_salarie[person].CP
+
