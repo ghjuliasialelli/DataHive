@@ -1,2 +1,2 @@
-# DataHive Hackaton
-# SEB AND GHJU <3 SCHRODINGER CATS
+# 2019 DataHive Hackaton
+## Team : SCHRODINGER CATS
